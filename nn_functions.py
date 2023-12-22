@@ -13,3 +13,4 @@ def binary_cross_entropy_loss(y_true, y_pred):
     m = y_true.shape[0]  # Number of samples
     loss = -1/m * np.sum(y_true * np.log(y_pred) + (1 - y_true) * np.log(1 - y_pred))
     return loss
+ 
