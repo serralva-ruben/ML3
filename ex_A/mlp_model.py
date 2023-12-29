@@ -1,11 +1,10 @@
 import numpy as np
-from nn_functions import relu, relu_derivative, softmax, categorical_cross_entropy_loss, sigmoid
+from nn_functions import relu, relu_derivative, categorical_cross_entropy_loss, sigmoid
 import matplotlib.pyplot as plt
 from ml_utils import predict
-from IPython.display import clear_output
 
 class MLP:
-    def __init__(self, input_size, hidden_size, output_size, learning_rate=0.01, batch_size=32, seed=None):
+    def __init__(self, input_size=2, hidden_size=10, output_size=2, learning_rate=0.01, batch_size=32, seed=42):
         self.learning_rate = learning_rate
         self.batch_size = batch_size
 
@@ -24,75 +23,88 @@ class MLP:
         self.Wo = rng.normal(loc=0, scale=np.sqrt(2./hidden_size), size=(output_size, hidden_size))
         self.bo = np.zeros((output_size, 1))
 
-    def train(self, X_train, y_train, X_val, y_val, epochs, plot_interval=5):
+    def train(self, X_train, y_train, X_val, y_val, epochs, plot_interval=5, early_stopping_threshold=0.000000001):
+        train_losses = []
+        val_losses = []
+
+        plt.figure(figsize=(8, 6))
+        live_plot_figure = plt.gcf() 
+
         for epoch in range(epochs):
-        # Shuffle the training data if needed
-        # (optional, but often beneficial for stochastic gradient descent)
+            # Training phase
+            train_loss = self.run_epoch(X_train, y_train, training=True)
+            train_losses.append(train_loss)
 
-            for i in range(0, len(y_train), self.batch_size):
-                # Mini-batch training
-                X_batch = X_train[i:i + self.batch_size]
-                y_batch = y_train[i:i + self.batch_size]
+            # Validation phase
+            val_loss = self.run_epoch(X_val, y_val, training=False)
+            val_losses.append(val_loss)
 
-                # Forward pass
-                y_pred = self.forward(X_batch)
+            # Early stopping based on validation loss
+            if epoch > 0 and abs(val_losses[-1] - val_losses[-2]) < early_stopping_threshold:
+                print(f"Stopping early at epoch {epoch+1}")
+                break
 
-                # Compute loss (implement a function to calculate the loss)
-                loss = categorical_cross_entropy_loss(y_batch, y_pred.T)
-
-                # Backpropagation to compute gradients
-                gradients = self.backpropagation(X_batch, y_batch, y_pred)
-
-                # Update weights and biases
-                self.update_weights(gradients)
-
-            if epoch % 2 == 0:
-                print(f"Epoch {epoch + 1}/{epochs}, Loss: {loss}")
-
+            # Plotting
             if epoch % plot_interval == 0:
-                plt.clf()
-                self.plot_predictions(X_val, y_val, epoch)
-                plt.show()
+                live_plot_figure.clf()
+                self.plot_decision_boundaries(X_val, y_val, epoch)
+                live_plot_figure.canvas.draw()
                 plt.pause(0.01)
 
-            
+            print(f"Epoch {epoch + 1}/{epochs}, Train Loss: {train_loss}, Val Loss: {val_loss}")
 
-    def plot_predictions(self, X, y, current_epoch):
+        return train_losses, val_losses
+
+    def run_epoch(self, X, y, training=True):
+        epoch_loss = 0
+        num_batches = int(np.ceil(len(y) / self.batch_size))
+
+        for i in range(0, len(y), self.batch_size):
+            X_batch = X[i:i + self.batch_size]
+            y_batch = y[i:i + self.batch_size]
+
+            # Forward pass
+            y_pred = self.forward(X_batch)
+
+            # Compute loss
+            loss = categorical_cross_entropy_loss(y_batch, y_pred.T)
+            epoch_loss += loss
+
+            if training:
+                # Backpropagation and weight update
+                gradients = self.backpropagation(X_batch, y_batch, y_pred)
+                self.update_weights(gradients)
+
+        return epoch_loss / num_batches
+
+    def plot_decision_boundaries(self, X, y, current_epoch):
         # Assuming y is one-hot encoded; convert to class labels
         y_labels = np.argmax(y, axis=1) if y.ndim > 1 else y
-        
-        # Predict labels for X
-        y_pred = predict(self, X)
 
-        # Plotting
-        self.plot_decision_boundaries(X, y)
-        plt.scatter(X[:, 0], X[:, 1], c=y_labels, alpha=0.5, label='True Labels')
-        plt.scatter(X[:, 0], X[:, 1], c=y_pred, alpha=0.5, label='Predicted Labels')
-        plt.title(f'Epoch: {current_epoch+1}')
-        plt.xlabel('Feature 1')
-        plt.ylabel('Feature 2')
-        plt.legend()
-
-    def plot_decision_boundaries(self, X, y):
-        # Set min and max values and give some padding
+        # Plotting decision boundaries
         x_min, x_max = X[:, 0].min() - 1, X[:, 0].max() + 1
         y_min, y_max = X[:, 1].min() - 1, X[:, 1].max() + 1
-        h = 0.02  # Step size in the mesh
 
         # Generate a grid of points with distance h between them
-        xx, yy = np.meshgrid(np.arange(x_min, x_max, h), np.arange(y_min, y_max, h))
+        xx, yy = np.meshgrid(np.arange(x_min, x_max, 0.01), np.arange(y_min, y_max, 0.01))
 
         # Predict the function value for the whole grid
-        Z = predict(self, np.c_[xx.ravel(), yy.ravel()])
-        Z = Z.reshape(xx.shape)
+        Z = predict(self, np.c_[xx.ravel(), yy.ravel()]).reshape(xx.shape)
 
         # Plot the contour and training examples
         plt.contourf(xx, yy, Z, alpha=0.8, cmap='viridis')
-        plt.xlabel('Feature 1')
-        plt.ylabel('Feature 2')
         plt.xlim(xx.min(), xx.max())
         plt.ylim(yy.min(), yy.max())
 
+        # Separate each class
+        class_0 = X[y_labels == 0]
+        class_1 = X[y_labels == 1]
+
+        #update the plot title and scatter the true points for each class and legend
+        plt.title(f'Epoch: {current_epoch+1}')
+        plt.scatter(class_0[:, 0], class_0[:, 1], alpha=1, edgecolor='k', label='Class 0', cmap='winter', color= 'Purple')
+        plt.scatter(class_1[:, 0], class_1[:, 1], alpha=1, edgecolor='k', label='Class 1', cmap='winter', color = 'Yellow')
+        plt.legend()
 
     def forward(self, X):
         Z1 = np.dot(self.W0, X.T) + self.b0
