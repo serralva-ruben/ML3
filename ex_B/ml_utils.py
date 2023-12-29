@@ -1,6 +1,10 @@
 import numpy as np
 #function to calculate the accuracy
 def calculate_accuracy(y_true, y_pred):
+    if y_true.ndim > 1:  # Check if y_true is one-hot encoded
+        y_true = np.argmax(y_true, axis=1)
+    if y_pred.ndim > 1:  # Check if y_pred is one-hot encoded
+        y_pred = np.argmax(y_pred, axis=1)
     correct_predictions = np.sum(y_true == y_pred)
     accuracy = correct_predictions / len(y_true)
     return accuracy
