@@ -1,7 +1,7 @@
 import numpy as np
 from mlp_model import MLP
 from sklearn.model_selection import train_test_split
-from ml_utils import confusion_matrix, calculate_accuracy
+from ml_utils import confusion_matrix, calculate_accuracy, predict
 import matplotlib.pyplot as plt
 
 # Function to generate random dataset
@@ -33,20 +33,14 @@ y_test = np.eye(2)[y_test]
 input_size = 2
 hidden_size = 10
 output_size = 2
-learning_rate = 0.00001
-batch_size = 2
-epochs = 100
+learning_rate = 0.0001
+batch_size = 1
+epochs = 2
 
 mlp = MLP(input_size, hidden_size, output_size, learning_rate, batch_size)
 
 # Train the model
 mlp.train(X_train, y_train, X_test, y_test, epochs, plot_interval=1)
-
-# Function to predict labels
-def predict(model, X):
-    outputs = model.forward(X)
-    y_pred = np.argmax(outputs, axis=0)
-    return y_pred
 
 # Evaluate on the test set
 y_pred = predict(mlp, X_test)

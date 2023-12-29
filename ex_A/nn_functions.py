@@ -14,6 +14,8 @@ def softmax(x):
     e_x = np.exp(shift_x)
     return e_x / np.sum(e_x, axis=1, keepdims=True)
 
+def sigmoid(x):
+    return 1 / (1 + np.exp(-x))
 
 def categorical_cross_entropy_loss(y_true, y_pred):
     m = y_pred.shape[0]  # Number of samples

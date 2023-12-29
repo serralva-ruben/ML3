@@ -36,9 +36,9 @@ X_val = normalize_features(X_val)
 input_size = 2
 hidden_size = 10
 output_size = 2
-learning_rate = 0.000001
-batch_size = 16
-epochs = 1000
+learning_rate = 0.01
+batch_size = 32
+epochs = 100
 
 mlp = MLP(input_size, hidden_size, output_size, learning_rate, batch_size)
 
@@ -49,12 +49,14 @@ mlp.train(X_train, y_train, X_val, y_val, epochs, plot_interval=1)
 y_pred = predict(mlp, X_val)
 print(f"Y_pred: {y_pred}")
 
-y_pred_one_hot = one_hot_encode(y_pred, num_classes)
 
 accuracy = calculate_accuracy(y_val, one_hot_encode(y_pred, num_classes))
 print(f'Validation Accuracy: {accuracy:.2f}')
 
 # Compute confusion matrix 
+y_pred_one_hot = one_hot_encode(y_pred, num_classes)
 conf_matrix = confusion_matrix(y_val, y_pred_one_hot)
 print('Confusion Matrix:')
 print(conf_matrix)
+
+plt.show(block=True)

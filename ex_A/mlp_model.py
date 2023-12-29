@@ -1,5 +1,5 @@
 import numpy as np
-from nn_functions import relu, relu_derivative, softmax, categorical_cross_entropy_loss
+from nn_functions import relu, relu_derivative, softmax, categorical_cross_entropy_loss, sigmoid
 import matplotlib.pyplot as plt
 from ml_utils import predict
 from IPython.display import clear_output
@@ -23,7 +23,6 @@ class MLP:
         # Output layer (assuming Softmax activation)
         self.Wo = rng.normal(loc=0, scale=np.sqrt(2./hidden_size), size=(output_size, hidden_size))
         self.bo = np.zeros((output_size, 1))
-        plt.show()
 
     def train(self, X_train, y_train, X_val, y_val, epochs, plot_interval=5):
         for epoch in range(epochs):
@@ -54,7 +53,7 @@ class MLP:
                 plt.clf()
                 self.plot_predictions(X_val, y_val, epoch)
                 plt.show()
-                plt.pause(0.00001)
+                plt.pause(0.01)
 
             
 
@@ -69,7 +68,7 @@ class MLP:
         self.plot_decision_boundaries(X, y)
         plt.scatter(X[:, 0], X[:, 1], c=y_labels, alpha=0.5, label='True Labels')
         plt.scatter(X[:, 0], X[:, 1], c=y_pred, alpha=0.5, label='Predicted Labels')
-        plt.title(f'Epoch: {current_epoch}')
+        plt.title(f'Epoch: {current_epoch+1}')
         plt.xlabel('Feature 1')
         plt.ylabel('Feature 2')
         plt.legend()
@@ -103,7 +102,7 @@ class MLP:
         self.A2 = relu(Z2)
 
         Z3 = np.dot(self.Wo, self.A2) + self.bo
-        A3 = softmax(Z3)
+        A3 = sigmoid(Z3)
 
         return A3
 
