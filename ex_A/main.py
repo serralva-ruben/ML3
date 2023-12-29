@@ -21,8 +21,8 @@ def normalize_features(X):
     return (X - np.mean(X, axis=0)) / np.std(X, axis=0)
 
 # We load the inputs and outputs for both training and validation datasets
-X_train, y_train = load_data('THA3train.xlsx')
-X_val, y_val = load_data('THA3validate.xlsx')
+X_train, y_train = load_data('../THA3train.xlsx')
+X_val, y_val = load_data('../THA3validate.xlsx')
 num_classes = np.max(y_train) + 1
 
 y_train = one_hot_encode(y_train, num_classes)
