@@ -14,7 +14,5 @@ def confusion_matrix(y_true, y_pred):
 
 def predict(model, X):
     outputs = model.forward(X)
-    print("Shape of softmax outputs:", outputs.shape)
-    print("Softmax output for a sample:", outputs[:, :5])  # Print first few probabilities for checking
     predictions = np.argmax(outputs, axis=0)  # Convert softmax probabilities to class labels
     return predictions
