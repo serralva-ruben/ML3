@@ -15,7 +15,9 @@ def softmax(x):
     return e_x / np.sum(e_x, axis=1, keepdims=True)
 
 
-def binary_cross_entropy_loss(y_true, y_pred):
-    m = y_true.shape[0]  # Number of samples
-    loss = -1/m * np.sum(y_true * np.log(y_pred) + (1 - y_true) * np.log(1 - y_pred))
+def categorical_cross_entropy_loss(y_true, y_pred):
+    m = y_pred.shape[0]  # Number of samples
+    # Compute the loss
+    loss = -1/m * np.sum(y_true * np.log(y_pred + 1e-10))
     return loss
+
