@@ -23,7 +23,7 @@ class MLP:
         self.Wo = rng.normal(loc=0, scale=np.sqrt(2./hidden_size), size=(output_size, hidden_size))
         self.bo = np.zeros((output_size, 1))
 
-    def train(self, X_train, y_train, X_val, y_val, epochs, plot_interval=5, early_stopping_threshold=0.000000001):
+    def train(self, X_train, y_train, X_val, y_val, epochs, plot_interval=5, early_stopping_threshold=0.0001):
         train_losses = []
         val_losses = []
 
