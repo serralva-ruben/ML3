@@ -28,7 +28,7 @@ y_val = one_hot_encode(y_val, num_classes)
 X_train = normalize_features(X_train)
 X_val = normalize_features(X_val)
 
-# Select the best and worst performing models based on your earlier heatmap results
+# Select the best and worst performing models based on our heatmap results
 best_lr = 0.0001  
 best_std_dev = 0.7
 
